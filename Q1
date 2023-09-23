@@ -1,0 +1,90 @@
+#include <stdio.h>
+
+struct virtualMachine{
+    int id;
+    int cpu;
+    int memory;
+    int storage;
+};
+
+// Fucntions used
+int compareVM(struct virtualMachine *vm1,struct virtualMachine *vm2);
+int partition(struct virtualMachine *vms,int low,int high);
+void quickSort(struct virtualMachine *vms,int low,int high);
+
+
+int main() {
+    struct virtualMachine vms[]={
+        {101,10,16,32},
+        {102,16,24,48},
+        {103,10,16,24},
+        {104,18,25,40}
+    };
+
+    int numVms=sizeof(vms)/sizeof(vms[0]);
+
+// Sorting the VMs in ascending order using Quick Sort with custom comparator
+    quickSort(vms,0,numVms-1);
+
+// Displaying the sorted VMs
+    printf("\tVM List based on efficiency in resource utilization:\n");
+    for (int i=0;i<numVms;++i){
+        printf("VM %d: CPU=%d Memory=%d Storage=%d\n",vms[i].id,vms[i].cpu, vms[i].memory,vms[i].storage);
+    }
+
+    return 0;
+}
+// Custom comparator function to compare VMs based on wastage in ascending order
+int compareVM(struct virtualMachine *vm1,struct virtualMachine *vm2){
+    // Calculate CPU wastage
+    int cpuWastage1=vm1->cpu - vm1->memory - vm1->storage;
+    int cpuWastage2=vm2->cpu - vm2->memory - vm2->storage;
+
+    // Calculate memory wastage
+    int memoryWastage1=vm1->memory - vm1->cpu - vm1->storage;
+    int memoryWastage2=vm2->memory - vm2->cpu - vm2->storage;
+
+    // Calculate storage wastage
+    int storageWastage1=vm1->storage - vm1->cpu - vm1->memory;
+    int storageWastage2=vm2->storage - vm2->cpu - vm2->memory;
+
+    // Compare based on CPU wastage first, then memory, and finally storage
+    if(cpuWastage1 != cpuWastage2)
+        return cpuWastage1-cpuWastage2;
+    if(memoryWastage1 != memoryWastage2)
+        return memoryWastage1-memoryWastage2;
+    return storageWastage1-storageWastage2;
+}
+
+// Partition function for Quick Sort
+int partition(struct virtualMachine *vms,int low,int high){
+    struct virtualMachine pivot=vms[high];
+    int i=low-1;
+    int j=low;
+
+    while(j<high){
+        if(compareVM(&vms[j],&pivot)>0){
+            i++;
+          
+            struct virtualMachine temp=vms[i];
+            vms[i]=vms[j];
+            vms[j]=temp;
+        }
+        j++;
+    }
+    struct virtualMachine temp=vms[i+1];
+    vms[i+1]=vms[high];
+    vms[high]=temp;
+
+    return i+1;
+}
+
+
+// Quick Sort function
+void quickSort(struct virtualMachine *vms,int low,int high){
+    if (low<high){
+        int pivotIndex=partition(vms, low,high);
+        quickSort(vms,low, pivotIndex-1);
+        quickSort(vms,pivotIndex+1,high);
+    }
+}
